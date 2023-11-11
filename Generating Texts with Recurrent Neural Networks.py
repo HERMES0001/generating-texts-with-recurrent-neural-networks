@@ -1,5 +1,3 @@
-
-
 import random
 import numpy as np
 import tensorflow as tf
@@ -9,9 +7,7 @@ from tensorflow.keras.layers import Activation, Dense, LSTM
 
 filepath = tf.keras.utils.get_file('shakespeare.txt', 'https://storage.googleapis.com/download.tensorflow.org/data/shakespeare.txt')
 
-text = open(filepath, 'rb')\
-    .read().decode(encoding='utf-8').lower()
-
+text = open(filepath, 'rb').read().decode(encoding='utf-8').lower()
 text = text[300000:800000]
 
 characters = sorted(set(text))
@@ -30,23 +26,19 @@ for i in range(0, len(text) - SEQ_LENGTH, STEP_SIZE):
     next_char.append(text[i + SEQ_LENGTH])
 
 x = np.zeros((len(sentences), SEQ_LENGTH, len(characters)), dtype=bool)
-
 y = np.zeros((len(sentences), len(characters)), dtype=bool)
 
-for i, satz in enumerate(sentences):
-    for t, char in enumerate(satz):
+for i, sentence in enumerate(sentences):
+    for t, char in enumerate(sentence):
         x[i, t, char_to_index[char]] = 1
     y[i, char_to_index[next_char[i]]] = 1
 
 model = Sequential()
-model.add(LSTM(128,
-               input_shape=(SEQ_LENGTH,
-                            len(characters))))
+model.add(LSTM(128, input_shape=(SEQ_LENGTH, len(characters))))
 model.add(Dense(len(characters)))
 model.add(Activation('softmax'))
 
-model.compile(loss='categorical_crossentropy',
-              optimizer=RMSprop(lr=0.01))
+model.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=0.01))
 
 model.fit(x, y, batch_size=256, epochs=4)
 
@@ -57,7 +49,6 @@ def sample(preds, temperature=1.0):
     preds = exp_preds / np.sum(exp_preds)
     probas = np.random.multinomial(1, preds, 1)
     return np.argmax(probas)
-
 
 def generate_text(length, temperature):
     start_index = random.randint(0, len(text) - SEQ_LENGTH - 1)
@@ -70,8 +61,7 @@ def generate_text(length, temperature):
             x_predictions[0, t, char_to_index[char]] = 1
 
         predictions = model.predict(x_predictions, verbose=0)[0]
-        next_index = sample(predictions,
-                                 temperature)
+        next_index = sample(predictions, temperature)
         next_character = index_to_char[next_index]
 
         generated += next_character
